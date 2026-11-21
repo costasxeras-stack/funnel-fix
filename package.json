@@ -1,0 +1,10 @@
+{
+  "name": "funnel-fix",
+  "version": "0.1.0",
+  "description": "Olist wins the first order and then loses the customer: 2% of happy first-time buyers order again. Where the funnel breaks, why, and an experiment designed to fix it, with a sample size and cost calculator.",
+  "private": true,
+  "scripts": {
+    "serve": "python3 -m http.server 8000"
+  },
+  "license": "MIT"
+}
