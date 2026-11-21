@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funnel Fix · The second order</title>
+<meta name="description" content="Olist wins the first order and then loses the customer: 2% order again. Where the funnel breaks, why, and an experiment designed to fix it, with a sample size and cost calculator.">
+<meta name="theme-color" content="#7a2e8a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237a2e8a'/%3E%3Cpath d='M7 8h18l-6 8v7l-6 3V16z' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css?v=1">
+<style>
+:root{--accent:#7a2e8a;--soft:#f3e8f5}
+.hero{padding:34px 0 8px}
+.hero .kicker{font:600 12.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.hero h1{font-size:clamp(30px,4.8vw,46px);line-height:1.08;margin-top:10px;max-width:22ch}
+.hero p{color:var(--muted);font-size:18px;max-width:68ch;margin:12px 0 0}
+.funnel{display:grid;gap:8px;margin-top:16px}
+.fs{display:grid;grid-template-columns:200px 1fr 110px;gap:12px;align-items:center}
+.fs .lab{font-size:14.5px;font-weight:500}
+.fs .lab small{display:block;color:var(--faint);font-weight:400;font-size:12.5px}
+.fs .bar{height:34px;border-radius:8px;background:#eeebe5;position:relative;overflow:hidden}
+.fs .bar i{display:block;height:100%;background:var(--accent);border-radius:8px;min-width:3px}
+.fs.break .bar i{background:var(--warn)}
+.fs .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.fs .v small{display:block;color:var(--faint);font-weight:400;font-size:12px}
+.callout{border-left:4px solid var(--warn);background:var(--warnsoft);border-radius:0 12px 12px 0;padding:12px 14px;margin-top:14px;font-size:15px}
+.finding{margin-top:14px;border-left:4px solid var(--accent);background:var(--soft);border-radius:0 12px 12px 0;padding:12px 14px;font-size:15px}
+.finding .tag,.callout .tag{font:600 11.5px var(--body);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
+.finding .tag{color:var(--accent)}.callout .tag{color:var(--warn)}
+.hb{display:grid;grid-template-columns:minmax(120px,190px) 1fr 64px;gap:10px;align-items:center;font-size:14px;margin-top:7px}
+.hb .t{height:14px;border-radius:7px;background:#eeebe5;overflow:hidden}
+.hb .t i{display:block;height:100%;background:var(--accent)}
+.hb .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.hist{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:170px;margin-top:14px}
+.hist .b{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;font-size:11.5px;color:var(--faint);text-align:center}
+.hist .b i{display:block;width:100%;max-width:46px;border-radius:5px 5px 0 0;background:#c9a6d1}
+.hist .b.hot i{background:var(--accent)}
+.hist .b em{font-style:normal;color:var(--ink);font-weight:600;font-size:12px}
+.spec{display:grid;grid-template-columns:180px 1fr;border-top:1px solid var(--line);margin-top:12px}
+.spec>div{padding:10px 4px;border-bottom:1px solid var(--line);font-size:14.5px}
+.spec>div:nth-child(odd){color:var(--faint);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.metrics .m{border:1px solid var(--line);border-radius:14px;padding:14px}
+.metrics .m h3{font:600 12.5px var(--body);text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.metrics .m ul{margin:8px 0 0;padding-left:18px;font-size:14.5px;display:grid;gap:5px}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px}
+.calc .in label{margin-top:14px}
+.calc output{font-weight:700;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.res .big{font:700 34px/1.1 var(--display)}
+.res .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.res .row2 div{border:1px solid var(--line);border-radius:12px;padding:12px}
+.res .row2 b{display:block;font:700 20px var(--display)}
+.res .row2 span{font-size:13px;color:var(--muted)}
+.tl{display:flex;height:30px;border-radius:8px;overflow:hidden;margin-top:12px;font-size:12px;color:#fff;font-weight:600}
+.tl span{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+.verdict{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:14.5px}
+.verdict.ok{background:var(--soft);color:var(--accent)}.verdict.bad{background:var(--warnsoft);color:var(--warn)}
+.phase{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.phase>div{border:1px solid var(--line);border-radius:14px;padding:16px}
+.phase h3{font:600 16px var(--body)}
+.phase p{font-size:14.5px;color:var(--muted);margin:6px 0 0}
+@media (max-width:760px){.calc,.metrics,.phase{grid-template-columns:1fr}}
+@media (max-width:600px){.fs{grid-template-columns:120px 1fr 74px;gap:8px}.fs .lab{font-size:13px}.spec{grid-template-columns:1fr}.spec>div:nth-child(odd){border-bottom:0;padding-bottom:0}.hb{grid-template-columns:110px 1fr 54px;font-size:13px}.hist{gap:3px}.hero p{font-size:16.5px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="./"><i><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11l-4 5v4l-3 1.5V8.5z" fill="white"/></svg></i>Funnel Fix</a>
+  <nav><a class="hide-sm" href="https://github.com/costasxeras-stack/funnel-fix">GitHub</a><a href="https://kostasxeras.com/">Portfolio</a></nav>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="kicker">Growth experiment · Olist public e-commerce data</span>
+    <h1>The first order goes well. Then the customer never comes back.</h1>
+    <p id="lead"></p>
+  </section>
+
+  <section class="card">
+    <h2>1. Where the funnel breaks</h2>
+    <p class="sub" id="fsub"></p>
+    <div class="funnel" id="funnel"></div>
+    <div class="callout"><span class="tag">The weak point</span><span id="callout"></span></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Is it a bad first experience?</h2>
+    <p class="sub">Share who order again within 180 days, by how the first order went.</p>
+    <div id="segs"></div>
+    <div class="finding"><span class="tag">Finding</span><span id="segf"></span></div>
+  </section>
+
+  <section class="card">
+    <h2>3. When do the few come back?</h2>
+    <p class="sub">Days from first to second order, for customers who returned within a year.</p>
+    <div class="hist" id="hist"></div>
+    <div class="finding"><span class="tag">Finding</span><span id="histf"></span></div>
+  </section>
+
+  <section class="card">
+    <h2>4. Which first purchases bring people back?</h2>
+    <p class="sub">180-day return rate by the category of the first order, for categories with at least 1,500 first-time customers.</p>
+    <div id="cats"></div>
+    <div class="finding"><span class="tag">Finding</span>Home categories (bed and bath, furniture and decor) and sports bring people back most, about 1 in 40. Gadgets and accessories bring back the fewest. The nudge should recommend from the category the customer already bought, where a follow-up purchase is natural.</div>
+  </section>
+
+  <section class="card">
+    <h2>5. The experiment: a nudge before the moment passes</h2>
+    <div class="spec" id="spec"></div>
+    <div class="metrics">
+      <div class="m"><h3>Primary metric</h3><ul><li>Second order on a later day, within 90 days of the first</li></ul></div>
+      <div class="m"><h3>Secondary</h3><ul><li>Second order within 180 days</li><li>Value of the second order</li><li>Message opens and clicks (leading signal)</li></ul></div>
+      <div class="m"><h3>Guardrails</h3><ul><li>Unsubscribe and complaint rate below [x]%</li><li>Review score on second orders not lower than first</li><li>Contribution per treated customer not negative (phase 2)</li></ul></div>
+    </div>
+    <h3 style="font:600 16px var(--body);margin-top:20px">Two phases, cheapest first</h3>
+    <div class="phase">
+      <div><h3>Phase 1: does a reminder alone work?</h3><p>Control: nothing, as today. Treatment: a message on day 21 with three products from the same category and seller. Costs almost nothing, so any lift pays.</p></div>
+      <div><h3>Phase 2: is free shipping worth it?</h3><p>Only if phase 1 lifts repeat orders. Reminder against reminder plus free shipping on the second order. Free shipping is paid on every second order, including the ones that would have happened anyway, so it must earn its cost. Use the calculator.</p></div>
+    </div>
+  </section>
+
+  <section class="card" id="calc">
+    <h2>6. How long will it run, and does it pay?</h2>
+    <p class="sub">Defaults come from the data. Change anything. Two-sided test, 5% significance.</p>
+    <div class="calc">
+      <div class="in">
+        <label for="base">Baseline: second order within 90 days <output id="baseo"></output></label><input type="range" id="base" min="0.5" max="10" step="0.01">
+        <label for="lift">Smallest lift worth detecting (relative) <output id="lifto"></output></label><input type="range" id="lift" min="10" max="100" step="5" value="50">
+        <label for="power">Power</label><select id="power"><option value="0.8">80%</option><option value="0.9">90%</option></select>
+        <label for="traffic">Eligible customers per month <output id="traffico"></output></label><input type="range" id="traffic" min="500" max="20000" step="5">
+        <label for="share">Share sent to treatment <output id="shareo"></output></label><input type="range" id="share" min="10" max="50" step="5" value="50">
+        <label for="freight">Free shipping cost per order, BRL (phase 2) <output id="freighto"></output></label><input type="range" id="freight" min="0" max="60" step="0.5">
+        <label for="margin">Your contribution margin per order, % <span class="opt">(your assumption, for the break-even)</span></label><input type="number" id="margin" min="1" max="80" step="1" placeholder="[x]">
+      </div>
+      <div class="res" aria-live="polite">
+        <div class="big" id="nout"></div><div class="sub" id="nsub"></div>
+        <div class="tl" id="tl"></div>
+        <div class="row2" id="r2"></div>
+        <div id="verdict"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Risks and how to handle them</h2>
+    <ul class="sub" style="display:grid;gap:8px;padding-left:18px">
+      <li><b>Who owns the customer.</b> Olist sells through large marketplaces, which may own the email address. If Olist cannot message buyers, run the same test as a card in the parcel with a QR code, randomised by seller dispatch batch.</li>
+      <li><b>Small numbers.</b> At a 1.37% baseline, only big lifts are detectable in reasonable time. The calculator shows why the test targets a 50% lift and runs about 5 to 6 months including the 90-day window.</li>
+      <li><b>Novelty and timing.</b> Day 21 is a choice from the data (a quarter of returners come back within 22 days). A later follow-up test could compare day 14 and day 45.</li>
+      <li><b>Cannibalisation.</b> Some treated customers would have come back anyway. That is exactly what the control group measures, and why the voucher cost is spread over all treated second orders.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Limits</h2>
+    <ul class="sub" style="display:grid;gap:6px;padding-left:18px">
+      <li>Data from 2016 to August 2018, and customers are matched by Olist's unique customer ID, which may miss people who used a different account.</li>
+      <li>Second orders on the same day as the first (30% of all second orders) are treated as one split basket, not a return.</li>
+      <li>The segments are correlations. A bad first order and not returning go together, but other things may explain both.</li>
+      <li>Nothing here has been tested. The experiment is a design, and every lift in the calculator is an input, not a result.</li>
+    </ul>
+  </section>
+</main>
+<footer><div class="wrap"><span>Funnel Fix v0.1.0 by <a href="https://kostasxeras.com/">Konstantinos Xeras</a>, built with Claude (Anthropic). <a href="https://github.com/costasxeras-stack/funnel-fix">Code, analysis and decisions on GitHub</a>.</span><span>Data: <a href="https://github.com/olist/work-at-olist-data">Olist public e-commerce dataset</a>, MIT licence. Olist is not involved in this project. Companion project: <a href="https://kostasxeras.com/query-to-decision/">Query to Decision</a>.</span></div></footer>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var n0 = function (x) { return Math.round(x).toLocaleString('en'); };
+  fetch('data/funnel.json').then(function (r) { return r.json(); }).then(render).catch(function () { $('lead').textContent = 'The data could not load. Refresh the page.'; });
+
+  function render(D) {
+    $('lead').textContent = 'Olist connects small Brazilian shops to large marketplaces. Of ' + n0(D.customers_total) + ' customers, only ' + D.any_repeat_pct + '% ever placed a second order, and almost a third of those second orders came the same day as the first. This page finds where the funnel breaks, tests why, and designs the experiment to fix it.';
+    $('fsub').textContent = n0(D.customers_180d) + ' customers whose first order was at least 180 days before the end of the data, so each had the same chance to come back.';
+    var F = D.funnel;
+    $('funnel').innerHTML = F.map(function (s, i) { var br = i === F.length - 1; return '<div class="fs' + (br ? ' break' : '') + '"><span class="lab">' + esc(s.step) + (i ? '<small>' + s.pct_of_previous + '% of the step before</small>' : '') + '</span><span class="bar"><i style="width:' + s.pct_of_start + '%"></i></span><span class="v">' + n0(s.customers) + '<small>' + s.pct_of_start + '%</small></span></div>'; }).join('');
+    var last = F[F.length - 1], prev = F[F.length - 2];
+    $('callout').innerHTML = 'Every step converts at 78% or more, until the second order. Of ' + n0(prev.customers) + ' customers who got their order and rated it 4 or 5 stars, only <b>' + n0(last.customers) + ' (' + last.pct_of_previous + '%)</b> ordered again within 180 days. That is the step to fix.';
+    var S = D.segments, mx = Math.max.apply(null, S.map(function (s) { return s.rep180_pct; }));
+    $('segs').innerHTML = S.map(function (s) { return '<div class="hb"><span>' + esc(s.segment) + ' <span class="note" style="margin:0">' + n0(s.customers) + '</span></span><span class="t"><i style="width:' + (s.rep180_pct / mx * 100) + '%"></i></span><span class="n">' + s.rep180_pct.toFixed(2) + '%</span></div>'; }).join('');
+    var on = S[0].rep180_pct.toFixed(2), late = S[1].rep180_pct.toFixed(2), hi = S[2].rep180_pct.toFixed(2), lo = S[4].rep180_pct.toFixed(2);
+    $('segf').innerHTML = 'A bad first order does hurt: late deliveries return at ' + late + '% against ' + on + '%, and 1 or 2 star raters at ' + lo + '% against ' + hi + '%. But even the happiest customers return only <b>' + hi + '%</b> of the time. Fixing delivery alone would barely move this. Nothing is bringing happy customers back.';
+    var H = D.gap_hist, hm = Math.max.apply(null, H.map(function (h) { return h.customers; }));
+    $('hist').innerHTML = H.map(function (h, i) { return '<div class="b' + (i === 0 ? ' hot' : '') + '"><em>' + h.customers + '</em><i style="height:' + (h.customers / hm * 120) + 'px"></i><span>' + h.days + '</span></div>'; }).join('');
+    $('histf').innerHTML = 'Half of returning customers come back within <b>' + D.gap_median_days + ' days</b>, and a quarter within <b>' + D.gap_p25 + '</b>. The first month is the busiest. A nudge on day 21, while the first order is fresh, lands just before that early wave would fade.';
+    var C = D.categories, cm = Math.max.apply(null, C.map(function (c) { return c.rep180_pct; }));
+    $('cats').innerHTML = C.map(function (c) { return '<div class="hb"><span>' + esc(c.category) + '</span><span class="t"><i style="width:' + (c.rep180_pct / cm * 100) + '%"></i></span><span class="n">' + c.rep180_pct.toFixed(2) + '%</span></div>'; }).join('');
+    var spec = [
+      ['Hypothesis', 'Happy first-time customers do not come back because nothing prompts them. A reminder on day 21 with products from the category they bought will raise second orders within 90 days from ' + D.baseline_rep90_eligible_pct + '% to at least ' + (D.baseline_rep90_eligible_pct * 1.5).toFixed(2) + '%.'],
+      ['Who is in it', 'First-time customers whose order arrived on time and who rated it 4 or 5 stars. About ' + n0(D.eligible_per_month_2018) + ' a month in 2018, ' + Math.round(D.eligible_per_month_2018 / D.new_customers_per_month_2018 * 100) + '% of new customers. Unhappy customers get a service follow-up instead, not a sales message.'],
+      ['Unit and split', 'Customer, randomised 50/50 when the review is submitted. Assignment stays fixed, even if they order again.'],
+      ['Control', 'No message. Today\'s experience.'],
+      ['Treatment', 'Day 21 message: "More from [shop]" with three products from the first order\'s category, linked to the marketplace listing.'],
+      ['Decision rule', 'Ship if the primary metric rises significantly and no guardrail is breached. If the lift is positive but not significant, extend once. If it is flat, try a different moment (day 7 or 45) before adding a voucher.']
+    ];
+    $('spec').innerHTML = spec.map(function (s) { return '<div>' + s[0] + '</div><div>' + esc(s[1]) + '</div>'; }).join('');
+    $('base').value = D.baseline_rep90_eligible_pct; $('traffic').value = D.eligible_per_month_2018; $('freight').value = D.freight_median_brl;
+    window.__D = D; ['base', 'lift', 'power', 'traffic', 'share', 'freight', 'margin'].forEach(function (id) { $(id).addEventListener('input', calc); $(id).addEventListener('change', calc); });
+    calc();
+  }
+  function z(p) { // inverse normal, Acklam
+    var a = [-39.69683028665376, 220.9460984245205, -275.9285104469687, 138.357751867269, -30.66479806614716, 2.506628277459239], b = [-54.47609879822406, 161.5858368580409, -155.6989798598866, 66.80131188771972, -13.28068155288572], c = [-0.007784894002430293, -0.3223964580411365, -2.400758277161838, -2.549732539343734, 4.374664141464968, 2.938163982698783], d = [0.007784695709041462, 0.3224671290700398, 2.445134137142996, 3.754408661907416];
+    var q, r; if (p < 0.02425) { q = Math.sqrt(-2 * Math.log(p)); return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+    if (p > 1 - 0.02425) { q = Math.sqrt(-2 * Math.log(1 - p)); return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1); }
+    q = p - 0.5; r = q * q; return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+  }
+  function calc() {
+    var D = window.__D, p1 = +$('base').value / 100, L = +$('lift').value / 100, p2 = p1 * (1 + L), pw = +$('power').value, T = +$('traffic').value, sh = +$('share').value / 100, fr = +$('freight').value, mg = +$('margin').value;
+    $('baseo').textContent = (p1 * 100).toFixed(2) + '%'; $('lifto').textContent = '+' + Math.round(L * 100) + '% (to ' + (p2 * 100).toFixed(2) + '%)'; $('traffico').textContent = n0(T); $('shareo').textContent = Math.round(sh * 100) + '%'; $('freighto').textContent = fr.toFixed(2) + ' BRL';
+    // unequal allocation: k = control/treatment ratio
+    var k = (1 - sh) / sh, za = z(0.975), zb = z(pw), d = p2 - p1;
+    var nt = Math.pow(za * Math.sqrt((1 + 1 / k) * ((p2 + k * p1) / (1 + k)) * (1 - (p2 + k * p1) / (1 + k))) + zb * Math.sqrt(p2 * (1 - p2) + p1 * (1 - p1) / k), 2) / (d * d);
+    var nc = nt * k, total = nt + nc, months = total / T, dur = months + 3;
+    $('nout').textContent = n0(total) + ' customers';
+    $('nsub').textContent = n0(nt) + ' in treatment and ' + n0(nc) + ' in control. Enrolment takes ' + months.toFixed(1) + ' months, plus 3 months to see each customer\'s 90-day result: about ' + dur.toFixed(1) + ' months in total.';
+    var w = months / dur * 100;
+    $('tl').innerHTML = '<span style="width:' + w + '%;background:var(--accent)">Enrolling ' + months.toFixed(1) + ' mo</span><span style="width:' + (100 - w) + '%;background:#c9a6d1;color:#3d1546">90-day window</span>';
+    // phase 2 economics: voucher paid on every treated second order
+    var costPerInc = d > 0 ? p2 * fr / d : Infinity, ov = D.order_value_median_brl;
+    $('r2').innerHTML = '<div><b>' + n0(nt * d) + '</b><span>extra second orders in treatment, if the lift is real</span></div><div><b>' + (isFinite(costPerInc) ? costPerInc.toFixed(2) + ' BRL' : '–') + '</b><span>free shipping cost per extra order (phase 2), against a median order of ' + ov.toFixed(2) + ' BRL</span></div>';
+    var be = costPerInc / ov * 100, v = '';
+    if (dur > 9) v = '<div class="verdict bad">Over 9 months to an answer. Aim for a bigger lift, widen who is eligible, or pick an earlier metric such as 60-day repeat.</div>';
+    else v = '<div class="verdict ok">An answer in about ' + dur.toFixed(1) + ' months. Workable for a growth team.</div>';
+    if (fr > 0 && isFinite(be)) v += mg > 0 ? (mg >= be ? '<div class="verdict ok">Free shipping pays for itself at a ' + mg + '% margin: break-even is ' + be.toFixed(0) + '%.</div>' : '<div class="verdict bad">Free shipping loses money at a ' + mg + '% margin. It needs a ' + be.toFixed(0) + '% margin at this lift, because it is also paid on second orders that would have happened anyway.</div>') : '<div class="verdict" style="background:#f3f1ed;color:var(--muted)">Free shipping needs a contribution margin of at least <b>' + be.toFixed(0) + '%</b> on the second order to break even at this lift. Enter your margin above to check.</div>';
+    $('verdict').innerHTML = v;
+  }
+})();
+</script>
+</body>
+</html>
