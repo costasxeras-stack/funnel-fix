@@ -85,4 +85,4 @@ Full record: [decisions/0003-target-a-large-lift.md](decisions/0003-target-a-lar
 
 ## My role
 
-I framed the problem, made the product calls, checked every number and wrote the conclusions. Claude (Anthropic) wrote the code with me. 
+I framed the problem, made the product calls, checked every number and wrote the conclusions. 

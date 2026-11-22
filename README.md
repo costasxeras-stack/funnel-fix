@@ -64,9 +64,9 @@ These are the experiment's own metrics. Nothing has run yet.
 2. Test the timing: day 7, 21 and 45
 3. Model which first orders predict a return, to target the message
 
-## How it was built
+## My role
 
-I framed the problem, made the product calls and wrote the conclusions. Claude (Anthropic) was my engineering partner for the code. 
+I framed the problem, made the product calls and wrote the conclusions. 
 
 ## Run it yourself
 
